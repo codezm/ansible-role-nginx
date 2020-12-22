@@ -1,0 +1,108 @@
+---
+# tasks file for nginx
+- name: Create web group.
+  group:
+    name: "{{ __web_group }}"
+    gid: "{{ __web_group_gid }}"
+    state: present
+
+- name: Create web user.
+  user:
+    name: "{{ __web_user }}"
+    uid: "{{ __web_user_uid }}"
+    createhome: no
+    shell: /sbin/nologin
+    group: "{{ __web_group }}"
+    state: present
+
+- name: Create nginx install directory.
+  file:
+    path: "{{ _nginx_source_install_path }}"
+    state: directory
+    recurse: yes
+    mode: o+x
+
+- name: Ensure nginx dependencies for building from source are installed.
+  package:
+    name:
+      - make
+      - gcc
+      - pcre-devel
+      - openssl-devel
+      - zlib-devel
+    state: present
+  tags: [ packages ]
+
+- name: "handle package file"
+  include_role:
+    name: codezm.common
+    tasks_from: packages
+  vars:
+    packageInstallWay: "{{ _nginx_install_way }}"
+    packageName: "nginx-{{ _nginx_version }}.tar.gz"
+    unpackName: "nginx-{{ _nginx_version }}"
+    downloadUrl: "{{ _nginx_download_url }}"
+    downloadTimeout: "{{ __ansible_get_url_timeout }}"
+    savePath: "{{ __package_tmp_save_dir }}"
+
+- name: Configure and build nginx source.
+  command: >
+    {{ _nginx_source_configure_command }}
+    chdir={{ __package_tmp_save_dir }}nginx-{{ _nginx_version }}
+  tags: [build]
+
+- name: Make and Install nginx.
+  command: >
+    {{ item }}
+    chdir={{ __package_tmp_save_dir }}nginx-{{ _nginx_version }}
+  with_items:
+    - "{{ _nginx_source_make_command }}"
+    - make install
+  tags: [build, make]
+
+- name: Ensure nginx executable is symlinked into a standard path.
+  file:
+    src: "{{ _nginx_binary_name }}"
+    dest: /usr/bin/nginx
+    state: link
+  when:
+    - _nginx_create_symlink == true
+  tags: [symlink]
+
+- name: Copy the nginx configuration file
+  template:
+    src: nginx.conf.j2
+    dest: "{{ _nginx_configurate_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload nginx
+  tags: [configuration, nginx.conf]
+
+- name: Copy the nginx service file
+  template:
+    src: nginx.service.j2
+    dest: "/lib/systemd/system/nginx.service"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - enable nginx
+  when: _nginx_using_service == true
+  tags: [configuration, nginx.service]
+
+- name: Clean source file
+  include_role:
+    name: codezm.common
+    tasks_from: clean
+  vars:
+    name: "{{ item.name }}"
+    path: "{{ item.path }}"
+  with_items:
+    - { name: "nginx-source-dir", path: "{{ __package_tmp_save_dir }}nginx-{{ _nginx_version }}" }
+    - { name: "nginx-compress-file", path: "{{ __package_tmp_save_dir }}nginx-{{ _nginx_version }}.tar.gz" }
+  when:
+    - __clean_origin_file == true
+  tags:
+    - clean

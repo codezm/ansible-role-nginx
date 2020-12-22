@@ -1,0 +1,4 @@
+---
+# defaults file for nginx
+nginx_worker_processes: "{% if ansible_processor_vcpus is defined %}{{ ansible_processor_vcpus }}{% else %}auto{% endif %}"
+nginx_root: "/data/htdocs"

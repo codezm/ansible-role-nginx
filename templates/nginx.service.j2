@@ -1,0 +1,18 @@
+[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+{% if nginx_pid_file is defined %}
+PIDFile={{ nginx_pid_file }}
+{% endif %}
+ExecStartPre={{ _nginx_binary_name }} -t
+ExecStart={{ _nginx_binary_name }}
+ExecReload={{ _nginx_binary_name }} -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

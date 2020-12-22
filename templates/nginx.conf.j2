@@ -1,0 +1,183 @@
+
+user  {{ __web_user }};
+worker_processes  {{ nginx_worker_processes }};
+
+{% raw %}#error_log  logs/error.log;{% endraw %}
+
+{% raw %}#error_log  logs/error.log  notice;{% endraw %}
+
+{% raw %}#error_log  logs/error.log  info;{% endraw %}
+
+
+{% raw %}#pid        logs/nginx.pid;{% endraw %}
+
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+{% raw %}    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '{% endraw %}
+
+{% raw %}    #                  '$status $body_bytes_sent "$http_referer" '{% endraw %}
+
+{% raw %}    #                  '"$http_user_agent" "$http_x_forwarded_for"';{% endraw %}
+
+
+{% raw %}    #access_log  logs/access.log  main;{% endraw %}
+
+
+    sendfile        on;
+{% raw %}    #tcp_nopush     on;{% endraw %}
+
+
+{% raw %}    #keepalive_timeout  0;{% endraw %}
+
+    keepalive_timeout  65;
+{% raw %}    #Fixed(nginx: 413 Request Entity Too Large, default limited: 1m){% endraw %}
+
+    client_max_body_size 20m;
+
+{% raw %}    #gzip  on;{% endraw %}
+
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+{% raw %}        #charset koi8-r;{% endraw %}
+
+
+{% raw %}        #access_log  logs/host.access.log  main;{% endraw %}
+
+
+        location / {
+            root   {{ nginx_root }};
+            index  index.html index.htm;
+        }
+
+{% raw %}        #error_page  404              /404.html;{% endraw %}
+
+
+{% raw %}        # redirect server error pages to the static page /50x.html{% endraw %}
+
+{% raw %}        #{% endraw %}
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+
+{% raw %}        # proxy the PHP scripts to Apache listening on 127.0.0.1:80{% endraw %}
+
+{% raw %}        #{% endraw %}
+
+{% raw %}        #location ~ \.php$ {{% endraw %}
+
+{% raw %}        #    proxy_pass   http://127.0.0.1;{% endraw %}
+
+{% raw %}        #}{% endraw %}
+
+
+{% raw %}        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000{% endraw %}
+
+{% raw %}        #{% endraw %}
+
+{% raw %}        #location ~ \.php$ {{% endraw %}
+
+{% raw %}        #    root           html;{% endraw %}
+
+{% raw %}        #    fastcgi_pass   127.0.0.1:9000;{% endraw %}
+
+{% raw %}        #    fastcgi_index  index.php;{% endraw %}
+
+{% raw %}        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;{% endraw %}
+
+{% raw %}        #    include        fastcgi_params;{% endraw %}
+
+{% raw %}        #}{% endraw %}
+
+
+{% raw %}        # deny access to .htaccess files, if Apache's document root{% endraw %}
+
+{% raw %}        # concurs with nginx's one{% endraw %}
+
+{% raw %}        #{% endraw %}
+
+{% raw %}        #location ~ /\.ht {{% endraw %}
+
+{% raw %}        #    deny  all;{% endraw %}
+
+{% raw %}        #}{% endraw %}
+
+    }
+
+
+{% raw %}    # another virtual host using mix of IP-, name-, and port-based configuration{% endraw %}
+
+{% raw %}    #{% endraw %}
+
+{% raw %}    #server {{% endraw %}
+
+{% raw %}    #    listen       8000;{% endraw %}
+
+{% raw %}    #    listen       somename:8080;{% endraw %}
+
+{% raw %}    #    server_name  somename  alias  another.alias;{% endraw %}
+
+
+{% raw %}    #    location / {{% endraw %}
+
+{% raw %}    #        root   html;{% endraw %}
+
+{% raw %}    #        index  index.html index.htm;{% endraw %}
+
+{% raw %}    #    }{% endraw %}
+
+{% raw %}    #}{% endraw %}
+
+
+
+{% raw %}    # HTTPS server{% endraw %}
+
+{% raw %}    #{% endraw %}
+
+{% raw %}    #server {{% endraw %}
+
+{% raw %}    #    listen       443 ssl;{% endraw %}
+
+{% raw %}    #    server_name  localhost;{% endraw %}
+
+
+{% raw %}    #    ssl_certificate      cert.pem;{% endraw %}
+
+{% raw %}    #    ssl_certificate_key  cert.key;{% endraw %}
+
+
+{% raw %}    #    ssl_session_cache    shared:SSL:1m;{% endraw %}
+
+{% raw %}    #    ssl_session_timeout  5m;{% endraw %}
+
+
+{% raw %}    #    ssl_ciphers  HIGH:!aNULL:!MD5;{% endraw %}
+
+{% raw %}    #    ssl_prefer_server_ciphers  on;{% endraw %}
+
+
+{% raw %}    #    location / {{% endraw %}
+
+{% raw %}    #        root   html;{% endraw %}
+
+{% raw %}    #        index  index.html index.htm;{% endraw %}
+
+{% raw %}    #    }{% endraw %}
+
+{% raw %}    #}{% endraw %}
+
+
+}

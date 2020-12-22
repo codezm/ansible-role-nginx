@@ -1,0 +1,27 @@
+---
+# vars file for nginx
+# The nginx version.
+_nginx_version: "1.18.0"
+
+# The nginx install way: network、file.
+_nginx_install_way: "{% if env_install_way is defined %}{{ env_install_way }}{% else %}network{% endif %}"
+_nginx_download_url: "http://nginx.org/download/nginx-{{ _nginx_version }}.tar.gz"
+_nginx_source_make_command: "make"
+_nginx_source_install_path: "/data/nginx"
+_nginx_binary_name: "{{ _nginx_source_install_path }}/sbin/nginx"
+_nginx_configurate_file: "{{ _nginx_source_install_path }}/conf/nginx.conf"
+_nginx_create_symlink: true
+# Whether manager nginx process by service (systemctl)
+_nginx_using_service: true
+
+_nginx_source_configure_command: >
+  ./configure
+  --user={{ __web_user }}
+  --group={{ __web_group }}
+  --prefix={{ _nginx_source_install_path }}
+  --with-http_ssl_module
+  --with-http_gzip_static_module
+  --with-http_gunzip_module
+  --with-http_v2_module
+  --with-http_realip_module
+  --with-http_stub_status_module

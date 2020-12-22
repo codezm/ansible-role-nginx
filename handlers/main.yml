@@ -1,0 +1,41 @@
+---
+# handlers file for nginx
+- name: enable nginx
+  service:
+    name: nginx
+    enabled: yes
+  notify:
+    - check nginx configuration
+    - start nginx
+
+- name: start nginx
+  service:
+    name: nginx
+    state: started
+
+- name: restart nginx
+  debug: msg="checking config first"
+  changed_when: True
+  notify:
+    - check nginx configuration
+    - restart nginx - after config check
+
+- name: reload nginx
+  debug: msg="checking config first"
+  changed_when: True
+  notify:
+    - check nginx configuration
+    - reload nginx - after config check
+  when: _nginx_using_service == true
+
+- name: check nginx configuration
+  command: "{{ _nginx_binary_name }} -t -c {{ _nginx_configurate_file }}"
+  register: result
+  changed_when: "result.rc != 0"
+  check_mode: no
+
+- name: restart nginx - after config check
+  service: name=nginx state=restarted
+
+- name: reload nginx - after config check
+  service: name=nginx state=reloaded
