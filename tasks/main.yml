@@ -32,6 +32,19 @@
       - zlib-devel
     state: present
   tags: [ packages ]
+  when: ansible_os_family == "CentOS"
+
+- name: Ensure nginx dependencies for building from source are installed.
+  package:
+    name:
+      - make
+      - gcc
+      - libpcre3-dev
+      - libssl-dev
+      - zlib1g-dev
+    state: present
+  tags: [ packages ]
+  when: ansible_os_family == "Debian"
 
 - name: "handle package file"
   include_role:

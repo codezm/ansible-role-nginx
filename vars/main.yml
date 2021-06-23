@@ -1,7 +1,7 @@
 ---
 # vars file for nginx
 # The nginx version.
-_nginx_version: "1.18.0"
+_nginx_version: "{% if nginx_version is defined %}{{ nginx_version }}{% else %}1.20.1{% endif %}"
 
 # The nginx install way: network、file.
 _nginx_install_way: "{% if env_install_way is defined %}{{ env_install_way }}{% else %}network{% endif %}"
