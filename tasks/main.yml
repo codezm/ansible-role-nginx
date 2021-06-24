@@ -46,6 +46,11 @@
   tags: [ packages ]
   when: ansible_os_family == "Debian"
 
+- name: Set workaround
+  set_fact:
+    # __sourcePath
+    sourcePath: "{{ role_path }}/files"
+
 - name: "handle package file"
   include_role:
     name: codezm.common
@@ -57,6 +62,7 @@
     downloadUrl: "{{ _nginx_download_url }}"
     downloadTimeout: "{{ __ansible_get_url_timeout }}"
     savePath: "{{ __package_tmp_save_dir }}"
+    #sourcePath: "{{ __sourcePath }}"
 
 - name: Configure and build nginx source.
   command: >
