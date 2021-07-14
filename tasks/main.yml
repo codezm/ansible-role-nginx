@@ -32,7 +32,7 @@
       - zlib-devel
     state: present
   tags: [ packages ]
-  when: ansible_os_family == "CentOS"
+  when: ansible_os_family == "RedHat"
 
 - name: Ensure nginx dependencies for building from source are installed.
   package:
